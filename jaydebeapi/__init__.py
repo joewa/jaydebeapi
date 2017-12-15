@@ -27,6 +27,7 @@ import time
 import re
 import sys
 import warnings
+import pandas as pd #Joerg
 
 PY2 = sys.version_info[0] == 2
 
@@ -578,11 +579,22 @@ def _unknownSqlTypeConverter(rs, col):
     return rs.getObject(col)
 
 def _to_datetime(rs, col):
-    java_val = rs.getTimestamp(col)
+    #print("Type_of rs:%s" % (type(rs)))
+    #print("dict_of rs:%s" % (rs.__dict__))
+    try:
+        java_val = rs.getTimestamp(col)
+        #print("Type_of java_val in try:%s" % (type(java_val)))
+        d = datetime.datetime.strptime(str(java_val)[:19], "%Y-%m-%d %H:%M:%S")
+        d = d.replace(microsecond=int(str(java_val.getNanos())[:6]))
+    except: # Try something else...
+        java_val = rs.currentRow.elementData[col]#.getObject(col)
+        #print("Type_of java_val in except:%s" % (type(java_val)))
+        #print("Value java_val in except:%s" % (java_val))
+        d = pd.to_datetime(java_val, errors='coerce')
+        #d = datetime.datetime.strptime(str(java_val)[:19], "%Y-%m-%d %H:%M:%S")
+        #d = java_val # datetime.datetime(java_val)
     if not java_val:
         return
-    d = datetime.datetime.strptime(str(java_val)[:19], "%Y-%m-%d %H:%M:%S")
-    d = d.replace(microsecond=int(str(java_val.getNanos())[:6]))
     return str(d)
 
 def _to_time(rs, col):
