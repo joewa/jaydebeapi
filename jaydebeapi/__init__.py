@@ -636,7 +636,17 @@ _to_double = _java_to_py('doubleValue')
 
 _to_int = _java_to_py('intValue')
 
-_to_longint = _java_to_py('longValue')
+def _to_longint(rs, col):
+    # http://stackoverflow.com/questions/26899595
+    # https://github.com/baztian/jaydebeapi/issues/6
+    # https://github.com/baztian/jaydebeapi/blob/master/jaydebeapi/__init__.py
+    # https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html
+    # http://docs.oracle.com/javase/7/docs/api/java/sql/ResultSet.html
+    java_val = rs.getObject(col)
+    if java_val is None:
+        return
+    v = getattr(java_val, 'toString')()  # Java call: java_val.toString()
+    return int(v)
 
 _to_boolean = _java_to_py('booleanValue')
 
