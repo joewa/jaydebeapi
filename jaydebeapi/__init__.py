@@ -587,10 +587,11 @@ def _to_datetime(rs, col):
         d = datetime.datetime.strptime(str(java_val)[:19], "%Y-%m-%d %H:%M:%S")
         d = d.replace(microsecond=int(str(java_val.getNanos())[:6]))
     except: # Try something else...
-        java_val = rs.currentRow.elementData[col]#.getObject(col)
-        #print("Type_of java_val in except:%s" % (type(java_val)))
-        #print("Value java_val in except:%s" % (java_val))
+        java_val = rs.currentRow.elementData[col-1]#.getObject(col) # TODO: Weird: Why [col-1]??
+        # print("Type_of java_val in except:%s" % (type(java_val)))
+        # print("Value java_val in except:%s" % (java_val))
         d = pd.to_datetime(java_val, errors='coerce')
+        #d = pd.to_datetime(java_val)
         #d = datetime.datetime.strptime(str(java_val)[:19], "%Y-%m-%d %H:%M:%S")
         #d = java_val # datetime.datetime(java_val)
     if not java_val:
