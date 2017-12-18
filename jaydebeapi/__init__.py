@@ -636,6 +636,8 @@ _to_double = _java_to_py('doubleValue')
 
 _to_int = _java_to_py('intValue')
 
+_to_longint = _java_to_py('longValue')
+
 _to_boolean = _java_to_py('booleanValue')
 
 def _init_types(types_map):
@@ -674,6 +676,7 @@ _DEFAULT_CONVERTERS = {
     'TINYINT': _to_int,
     'INTEGER': _to_int,
     'SMALLINT': _to_int,
+    'BIGINT': _to_longint,
     'BOOLEAN': _to_boolean,
     'BIT': _to_boolean
 }
