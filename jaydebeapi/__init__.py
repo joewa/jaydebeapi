@@ -93,6 +93,7 @@ def _jdbc_connect_jython(jclassname, url, driver_args, jars, libs):
         for i in dir(types):
             if const_re.match(i):
                 types_map[i] = getattr(types, i)
+        #print("_jdbc_connect_jython: %s" % (types_map))
         _init_types(types_map)
     global _java_array_byte
     if _java_array_byte is None:
@@ -446,6 +447,7 @@ class Cursor(object):
             for col in range(1, count + 1):
                 size = m.getColumnDisplaySize(col)
                 jdbc_type = m.getColumnType(col)
+                #print("property def description:%s" % (jdbc_type))
                 if jdbc_type == 0:
                     # PEP-0249: SQL NULL values are represented by the
                     # Python None singleton
@@ -576,7 +578,13 @@ class Cursor(object):
         pass
 
 def _unknownSqlTypeConverter(rs, col):
-    return rs.getObject(col)
+    java_val = rs.getObject(col)
+    # Handle ArrayList data
+    if str(type(java_val)).find("java.util.ArrayList") > 0:
+        ret_java_val = str( list(java_val) )
+    else:
+        ret_java_val = java_val
+    return ret_java_val
 
 def _to_datetime(rs, col):
     #print("Type_of rs:%s" % (type(rs)))
@@ -596,7 +604,14 @@ def _to_datetime(rs, col):
         #d = java_val # datetime.datetime(java_val)
     if not java_val:
         return
-    return str(d)
+    return str(d) # TODO: datetime rather than str
+
+def _to_list(rs, col):
+    java_val = rs.currentRow.elementData[col-1]
+    if not java_val:
+        return
+    print("Make a list: %s" % (list(java_val)))
+    return list(java_val)
 
 def _to_time(rs, col):
     java_val = rs.getTime(col)
@@ -651,6 +666,8 @@ def _to_longint(rs, col):
 
 _to_boolean = _java_to_py('booleanValue')
 
+
+
 def _init_types(types_map):
     global _jdbc_name_to_const
     _jdbc_name_to_const = types_map
@@ -689,5 +706,6 @@ _DEFAULT_CONVERTERS = {
     'SMALLINT': _to_int,
     'BIGINT': _to_longint,
     'BOOLEAN': _to_boolean,
-    'BIT': _to_boolean
+    'BIT': _to_boolean#,
+    #'JLIST': _to_list
 }
