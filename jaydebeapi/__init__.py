@@ -638,7 +638,7 @@ def _to_binary(rs, col):
 
 def _java_to_py(java_method):
     def to_py(rs, col):
-        java_val = rs.getObject(col)
+        java_val = rs.getObject(col) # TODO: Check why datatypes are returned as string
         if java_val is None:
             return
         if PY2 and isinstance(java_val, (string_type, int, long, float, bool)):
@@ -648,9 +648,15 @@ def _java_to_py(java_method):
         return getattr(java_val, java_method)()
     return to_py
 
-_to_double = _java_to_py('doubleValue')
+# _to_double = _java_to_py('doubleValue')
+def _to_double(rs, col):
+    java_func = _java_to_py('doubleValue')
+    return float(java_func(rs,col))
 
-_to_int = _java_to_py('intValue')
+# _to_int = _java_to_py('intValue')
+def _to_int(rs, col):
+    java_func = _java_to_py('intValue')
+    return int(java_func(rs,col))
 
 def _to_longint(rs, col):
     # http://stackoverflow.com/questions/26899595
