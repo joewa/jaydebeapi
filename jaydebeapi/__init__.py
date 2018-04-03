@@ -650,13 +650,20 @@ def _java_to_py(java_method):
 
 # _to_double = _java_to_py('doubleValue')
 def _to_double(rs, col):
-    java_func = _java_to_py('doubleValue')
-    return float(java_func(rs,col))
+    #java_func = _java_to_py('doubleValue')
+    #return float(java_func(rs,col))
+    # Removed because of:
+    #~\AppData\Local\Continuum\anaconda3\lib\site-packages\jaydebeapi\__init__.py in _to_double(rs, col)
+    #652 def _to_double(rs, col):
+    #653     java_func = _java_to_py('doubleValue')
+    #654     return float(java_func(rs,col))
+    #TypeError: float() argument must be a string or a number, not 'NoneType'
+    java_val = rs.getObject(col)
+    if java_val is None:
+        return
+    v = getattr(java_val, 'toString')()  # Java call: java_val.toString()
+    return float(v)
 
-# _to_int = _java_to_py('intValue')
-def _to_int(rs, col):
-    java_func = _java_to_py('intValue')
-    return int(java_func(rs,col))
 
 def _to_longint(rs, col):
     # http://stackoverflow.com/questions/26899595
@@ -669,6 +676,14 @@ def _to_longint(rs, col):
         return
     v = getattr(java_val, 'toString')()  # Java call: java_val.toString()
     return int(v)
+
+
+# _to_int = _java_to_py('intValue')
+def _to_int(rs, col):
+    #java_func = _java_to_py('intValue')
+    #return int(java_func(rs,col))
+    return _to_longint(rs, col)
+
 
 _to_boolean = _java_to_py('booleanValue')
 
